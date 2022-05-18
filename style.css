@@ -1,0 +1,53 @@
+.flex {
+    display: flex
+}
+
+.flex-col {
+    flex-direction: column
+}
+
+.flex-row {
+    flex-direction: row
+}
+
+.gap-1 {
+    gap: 1px 1px
+}
+
+.gap-2 {
+    gap: 5px 5px
+}
+
+.items-center {
+    align-items: center
+}
+
+.justify-center {
+    justify-content: center
+}
+
+.w-full {
+    width: 100%
+}
+
+.text-left {
+    text-align: left
+}
+
+body {
+    font-size: 18px;
+}
+
+h2, h3, h4 {
+  line-height: 1.2;
+  margin: 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+ul {
+    list-style: none;
+    padding-inline-start: 20px;
+}
