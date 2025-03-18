@@ -1,12 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
   const themeToggleBtn = document.getElementById("theme-toggle-btn");
 
-  // Check for saved theme preference or use preferred color scheme
+  // Check for saved theme preference or default to dark
   const savedTheme = localStorage.getItem("theme");
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-  // Set initial theme
-  if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+  // Set initial theme - default to dark if no preference saved
+  if (savedTheme === "light") {
+    document.documentElement.setAttribute("data-theme", "light");
+  } else {
     document.documentElement.setAttribute("data-theme", "dark");
   }
 
