@@ -101,6 +101,8 @@ li {
   height: 18px;
   filter: var(--icon-filter);
   transition: filter 0.3s ease;
+  vertical-align: middle;
+  display: flex;
 }
 
 .bio {
@@ -148,7 +150,7 @@ li {
 .social-links {
   display: flex;
   gap: 16px;
-  margin: 0.25rem 0 0.25rem 0;
+  margin-bottom: 0.25rem;
 }
 
 /* Work items */
@@ -246,4 +248,41 @@ li {
 [data-theme="light"] .moon-icon {
   display: block;
   filter: none;
+}
+
+/* Email link under name */
+.email-link {
+  font-size: 0.9rem;
+  color: var(--job-description-color);
+  display: flex;
+  align-items: center;
+}
+
+/* Contact and social links */
+.contact-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0.25rem 0 0.5rem 0;
+}
+
+.contact-separator {
+  color: var(--border-color);
+  margin: 0 4px;
+}
+
+/* Media icons */
+.media-icon {
+  width: 18px;
+  height: 18px;
+  filter: var(--icon-filter);
+  transition: filter 0.3s ease;
+  vertical-align: middle;
+  display: flex;
+}
+
+/* Icon links */
+.contact-links a {
+  display: flex;
+  align-items: center;
 }
