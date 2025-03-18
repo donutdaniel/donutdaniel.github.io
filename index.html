@@ -1,70 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible">
-        <title>dho</title>
-        <link rel="stylesheet" href="style.css">
-        <link rel="icon" href="favicon.ico">
-        <script src="main.js"></script>
-    </head>
-    <body>
-        <div class="flex flex-col gap-1 items-center justify-center w-full">
-            <h1>
-                Daniel Ho
-            </h1>
-            <div>
-                <a href="https://twitter.com/donutdho" target="_blank">twitter</a>
-                <a href="https://github.com/donutdaniel" target="_blank">github</a>
-                <a href="https://linkedin.com/in/danielho54" target="_blank">linkedin</a>
-                <a href="mailto:danielho54@gmail.com">email</a>
-            </div>
-            <div class="flex flex-col text-left" style="width: 80%">
-                <p>
-                    Engineering blockchain projects at <a href="https://koop.xyz/" target="_blank">🔆</a>
-                    <br/>
-                    <br/>
-                    CS 💻 and Linguistics 🌎 background. ML/NLP in the past.
-                </p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" />
+    <title>dho</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="favicon.ico" />
+    <script src="main.js" defer></script>
+  </head>
+  <body>
+    <div class="theme-toggle">
+      <button id="theme-toggle-btn" aria-label="Toggle dark mode">
+        <svg
+          class="sun-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg
+          class="moon-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="flex flex-col gap-2 items-center justify-center w-full">
+      <h1>Daniel Ho</h1>
+      <div class="social-links">
+        <a href="https://x.com/donutdho" target="_blank">
+          <img class="media-icon" src="icons/media/x.svg" alt="X" />
+        </a>
+        <a href="https://github.com/donutdaniel" target="_blank">
+          <img class="media-icon" src="icons/media/github.svg" alt="GitHub" />
+        </a>
+        <a href="https://linkedin.com/in/danielho54" target="_blank">
+          <img
+            class="media-icon"
+            src="icons/media/linkedin.svg"
+            alt="LinkedIn"
+          />
+        </a>
+        <a href="https://medium.com/@donutdaniel/" target="_blank">
+          <img class="media-icon" src="icons/media/medium.svg" alt="Medium" />
+        </a>
+        <a href="mailto:danielho54@gmail.com">
+          <img class="media-icon" src="icons/media/email.svg" alt="Email" />
+        </a>
+      </div>
+      <div class="flex flex-col text-left bio" style="width: 80%">
+        <p>
+          Engineering at the intersection of software, linguistics, and
+          artificial intelligence. Interested in building products with impact.
+          Reach out if you'd like to chat!
+        </p>
 
-                <h4>Work</h4>
-                <ul>
-                    <li>
-                        <a href="https://koop.xyz/" target="_blank">🔆 Koop</a> -
-                        Building the next generation of on-chain communities
-                    </li>
-                    <li>
-                        <a href="https://flexport.com/" target="_blank">🛳 Flexport</a> - 
-                        Product infrastructure. Microservices, DevOps, Dev Tooling.
-                    </li>
-                    <li>
-                        <a href="https://facebook.com/" target="_blank">💬 Facebook</a> -
-                        Messenger infrastructure. Contact and story delivery post processing storage unit.
-                    </li>
-                    <li>
-                        <a href="https://Salesforce.com/" target="_blank">☁️ Salesforce</a> -
-                        Product engineering. File streaming service.
-                    </li>
-                    <li>
-                        <a href="https://jpl.nasa.gov/" target="_blank">🚀 Nasa</a> -
-                        Deep learning with applied CNN noise detection filter.
-                    </li>
-                    <li>
-                        <a href="https://www.usc.edu/" target="_blank">🎓 USC</a> -
-                        Discrete Math and Algorithms
-                    </li>
-                </ul>
+        <h4>Work</h4>
+        <ul class="experience-list">
+          <li class="work-item">
+            <a href="https://anime.com/" target="_blank" class="company-link">
+              <img class="icon" src="icons/work/anime.png" alt="Anime" />
+              <span class="company-name">Anime</span>
+            </a>
+            <span class="job-description"
+              >Powering the next generation of anime fans.</span
+            >
+          </li>
+          <li class="work-item">
+            <a href="https://azuki.com/" target="_blank" class="company-link">
+              <img class="icon" src="icons/work/azuki.jpeg" alt="Azuki" />
+              <span class="company-name">Azuki</span>
+            </a>
+            <span class="job-description"
+              >At the intersection of art, technology, and community.</span
+            >
+          </li>
+          <li class="work-item">
+            <a href="https://koop.xyz/" target="_blank" class="company-link">
+              <img class="icon" src="icons/work/koop.jpeg" alt="Koop" />
+              <span class="company-name">Koop</span>
+            </a>
+            <span class="job-description"
+              >On-chain rails for creators and communities.</span
+            >
+          </li>
+          <li class="work-item">
+            <a
+              href="https://flexport.com/"
+              target="_blank"
+              class="company-link"
+            >
+              <img class="icon" src="icons/work/flexport.jpeg" alt="Flexport" />
+              <span class="company-name">Flexport</span>
+            </a>
+            <span class="job-description"
+              >Microservices, DevOps, Kubernetes Dev Environments.
+              <br />
+              Shipment domain modeling with an event driven architecture.
+            </span>
+          </li>
+          <li class="work-item">
+            <a
+              href="https://facebook.com/"
+              target="_blank"
+              class="company-link"
+            >
+              <img class="icon" src="icons/work/meta.jpeg" alt="Meta" />
+              <span class="company-name">Meta</span>
+            </a>
+            <span class="job-description"
+              >Messenger infrastructure. Profile and stories processing
+              unit.</span
+            >
+          </li>
+          <li class="work-item">
+            <a
+              href="https://Salesforce.com/"
+              target="_blank"
+              class="company-link"
+            >
+              <img
+                class="icon"
+                src="icons/work/salesforce.jpeg"
+                alt="Salesforce"
+              />
+              <span class="company-name">Salesforce</span>
+            </a>
+            <span class="job-description"
+              >File streaming service for real-time collaboration.</span
+            >
+          </li>
+          <li class="work-item">
+            <a
+              href="https://jpl.nasa.gov/"
+              target="_blank"
+              class="company-link"
+            >
+              <img class="icon" src="icons/work/nasa.jpeg" alt="NASA" />
+              <span class="company-name">NASA</span>
+            </a>
+            <span class="job-description"
+              >Deep learning applied to CNN noise detection</span
+            >
+          </li>
+          <li class="work-item">
+            <a href="https://www.usc.edu/" target="_blank" class="company-link">
+              <img class="icon" src="icons/work/usc.jpeg" alt="USC" />
+              <span class="company-name">USC</span>
+            </a>
+            <span class="job-description"
+              >Discrete Math and Algorithms.
+              <br />
+              Researcher evaluating pre-trained language models (BERT, GPT-2)
+              for their commonsense reasoning against textual logic
+              perturbations.
+            </span>
+          </li>
+        </ul>
 
-                <h4>Publications</h4>
-                <ul>
-                    <li>
-                        <a href="https://arxiv.org/abs/2005.00782">
-                            📄 RICA: Evaluating Robust Inference Capabilities Based on Commonsense Axioms
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </body>
+        <h4>Publications</h4>
+        <ul>
+          <li>
+            <a href="https://arxiv.org/abs/2005.00782">
+              📄 RICA: Evaluating Robust Inference Capabilities Based on
+              Commonsense Axioms
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>
 </html>
