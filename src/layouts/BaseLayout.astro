@@ -1,0 +1,64 @@
+---
+import "../styles/global.css";
+import { ViewTransitions } from "astro:transitions";
+import Nav from "../components/Nav.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const { title, description = "Daniel Ho — software engineer, writer, potter.", ogImage } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" href="/favicon.ico" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {ogImage && <meta property="og:image" content={new URL(ogImage, Astro.site)} />}
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />}
+    <ViewTransitions />
+    <script is:inline>
+      function applyThemeToDoc(doc) {
+        var saved = localStorage.getItem("theme");
+        var theme;
+        if (saved === "light") {
+          theme = "light";
+        } else if (saved === "dark") {
+          theme = "dark";
+        } else {
+          saved = "system";
+          theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        doc.documentElement.setAttribute("data-theme", theme);
+        doc.documentElement.setAttribute("data-theme-setting", saved);
+      }
+      applyThemeToDoc(document);
+      document.addEventListener("astro:before-swap", function (e) {
+        applyThemeToDoc(e.newDocument);
+      });
+    </script>
+  </head>
+  <body>
+    <Nav />
+    <slot />
+  </body>
+</html>

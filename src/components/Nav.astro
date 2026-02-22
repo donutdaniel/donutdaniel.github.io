@@ -1,0 +1,57 @@
+---
+---
+
+<nav>
+  <a href="/" class="nav-name">daniel ho</a>
+  <div class="nav-links">
+    <a href="/writing">writing</a>
+    <a href="https://github.com/donutdaniel" target="_blank">
+      <img class="media-icon" src="/icons/media/github.svg" alt="GitHub" />
+    </a>
+    <button id="theme-toggle-btn" aria-label="Toggle theme">
+      <img class="sun-icon" src="/icons/theme/sun.svg" alt="Light mode" />
+      <img class="moon-icon" src="/icons/theme/moon.svg" alt="Dark mode" />
+      <svg class="system-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const btn = document.getElementById("theme-toggle-btn");
+
+    function getThemeSetting() {
+      return localStorage.getItem("theme") || "system";
+    }
+
+    function applyTheme(setting) {
+      if (setting === "system") {
+        const sys = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", sys);
+      } else {
+        document.documentElement.setAttribute("data-theme", setting);
+      }
+      document.documentElement.setAttribute("data-theme-setting", setting);
+    }
+
+    function cycleTheme() {
+      const current = getThemeSetting();
+      const next = current === "dark" ? "light" : current === "light" ? "system" : "dark";
+      if (next === "system") {
+        localStorage.removeItem("theme");
+      } else {
+        localStorage.setItem("theme", next);
+      }
+      applyTheme(next);
+    }
+
+    applyTheme(getThemeSetting());
+    btn?.addEventListener("click", cycleTheme);
+
+    window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
+      if (getThemeSetting() === "system") applyTheme("system");
+    });
+  });
+</script>
