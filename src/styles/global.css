@@ -364,8 +364,7 @@ nav:not(.toc) {
 }
 
 .prose a {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration: none;
 }
 
 .prose img {
@@ -457,6 +456,7 @@ nav:not(.toc) {
 
 /* Post page header (has .post-meta, unlike the index list) */
 .post-header:has(.post-meta) {
+  display: block;
   margin: 0 0 1.5rem;
 }
 
