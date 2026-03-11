@@ -1,0 +1,143 @@
+---
+---
+
+<div class="fhir-diagram">
+  <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
+    <!-- Paths -->
+    <!-- Your App → REST → down → Gateway -->
+    <path id="path-rest" d="M 135 50 L 250 50 L 250 125" fill="none" stroke="var(--muted-color)" stroke-width="1" />
+    <!-- Gateway → Platforms -->
+    <path id="path-platforms" d="M 355 155 L 420 155" fill="none" stroke="var(--muted-color)" stroke-width="1" />
+    <!-- AI Agent → MCP → up → Gateway -->
+    <path id="path-mcp" d="M 135 265 L 250 265 L 250 185" fill="none" stroke="var(--muted-color)" stroke-width="1" />
+    <!-- User → up → Gateway/Platforms area -->
+    <path id="path-user" d="M 500 240 L 500 215" fill="none" stroke="var(--muted-color)" stroke-width="1" />
+
+    <!-- Animated dots — one direction -->
+    <circle r="3" fill="var(--link-color)">
+      <animateMotion dur="3s" repeatCount="indefinite">
+        <mpath href="#path-rest" />
+      </animateMotion>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.9;1" dur="3s" repeatCount="indefinite" />
+    </circle>
+    <circle r="3" fill="var(--link-color)" opacity="0">
+      <animateMotion dur="3s" begin="1.5s" repeatCount="indefinite">
+        <mpath href="#path-platforms" />
+      </animateMotion>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.9;1" dur="3s" begin="1.5s" repeatCount="indefinite" />
+    </circle>
+    <circle r="3" fill="var(--link-color)" opacity="0">
+      <animateMotion dur="3s" begin="0.75s" repeatCount="indefinite">
+        <mpath href="#path-mcp" />
+      </animateMotion>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.9;1" dur="3s" begin="0.75s" repeatCount="indefinite" />
+    </circle>
+    <circle r="3" fill="var(--link-color)" opacity="0">
+      <animateMotion dur="3s" begin="2.25s" repeatCount="indefinite">
+        <mpath href="#path-user" />
+      </animateMotion>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.9;1" dur="3s" begin="2.25s" repeatCount="indefinite" />
+    </circle>
+
+    <!-- Labels on paths -->
+    <text x="175" y="42" class="diagram-text label-text">REST</text>
+    <text x="175" y="257" class="diagram-text label-text">MCP</text>
+
+    <!-- Node: Your App -->
+    <rect x="20" y="25" width="115" height="50" rx="4" class="diagram-box" />
+    <text x="77" y="53" class="diagram-text node-text">Your App</text>
+
+    <!-- Node: FHIR Gateway -->
+    <rect x="185" y="125" width="170" height="60" rx="4" class="diagram-box gateway-box" />
+    <text x="270" y="158" class="diagram-text gateway-text">FHIR Gateway</text>
+
+    <!-- Node: Platforms -->
+    <rect x="420" y="95" width="160" height="120" rx="4" class="diagram-box platform-box" />
+    <text x="500" y="122" class="diagram-text platform-text">Aetna, Cigna,</text>
+    <text x="500" y="142" class="diagram-text platform-text">Epic, Cerner,</text>
+    <text x="500" y="162" class="diagram-text platform-text">UHC, Humana,</text>
+    <text x="500" y="186" class="diagram-text platform-accent">60+ systems</text>
+
+    <!-- Node: AI Agent -->
+    <rect x="20" y="240" width="115" height="50" rx="4" class="diagram-box" />
+    <text x="77" y="268" class="diagram-text node-text">AI Agent</text>
+
+    <!-- Node: User -->
+    <rect x="430" y="240" width="140" height="68" rx="4" class="diagram-box" />
+    <text x="500" y="260" class="diagram-text node-text">User</text>
+    <text x="500" y="278" class="diagram-text sub-text">(authorizes</text>
+    <text x="500" y="292" class="diagram-text sub-text">via OAuth)</text>
+  </svg>
+</div>
+
+<style>
+  .fhir-diagram {
+    margin: 2rem 0;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+
+  .fhir-diagram svg {
+    display: block;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    height: auto;
+  }
+
+  .diagram-text {
+    font-family: "JetBrains Mono", "Fira Code", "SF Mono", Menlo, monospace;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+
+  .node-text {
+    font-size: 13px;
+    font-weight: 600;
+    fill: var(--heading-color);
+  }
+
+  .gateway-text {
+    font-size: 14px;
+    font-weight: 600;
+    fill: var(--heading-color);
+  }
+
+  .sub-text {
+    font-size: 11px;
+    fill: var(--muted-color);
+  }
+
+  .label-text {
+    font-size: 11px;
+    fill: var(--muted-color);
+  }
+
+  .platform-text {
+    font-size: 11px;
+    fill: var(--muted-color);
+  }
+
+  .platform-accent {
+    font-size: 11px;
+    font-weight: 500;
+    fill: var(--link-color);
+  }
+
+  .diagram-box {
+    fill: none;
+    stroke: var(--muted-color);
+    stroke-width: 1.5;
+  }
+
+  .gateway-box {
+    stroke: var(--link-color);
+    stroke-width: 2;
+  }
+
+  .platform-box {
+    stroke-dasharray: 5 3;
+  }
+</style>

@@ -9,6 +9,8 @@ const writing = defineCollection({
     pubDate: z.coerce.date(),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    repo: z.string().url().optional(),
+    website: z.string().url().optional(),
   }),
 });
 

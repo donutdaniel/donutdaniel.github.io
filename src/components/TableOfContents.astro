@@ -1,0 +1,89 @@
+---
+interface Props {
+  headings: { depth: number; slug: string; text: string }[];
+  title: string;
+}
+
+const { headings, title } = Astro.props;
+const filtered = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{filtered.length > 0 && (
+  <nav class="toc">
+    <details class="toc-mobile">
+      <summary>Table of Contents</summary>
+      <ul>
+        <li><a href="#" class="toc-top">{title}</a></li>
+        {filtered.map((h) => (
+          <li class={h.depth === 3 ? "toc-indent" : ""}>
+            <a href={`#${h.slug}`}>{h.text}</a>
+          </li>
+        ))}
+      </ul>
+    </details>
+    <div class="toc-desktop">
+      <span class="toc-title">Contents</span>
+      <ul>
+        <li><a href="#" class="toc-top">{title}</a></li>
+        {filtered.map((h) => (
+          <li class={h.depth === 3 ? "toc-indent" : ""}>
+            <a href={`#${h.slug}`}>{h.text}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </nav>
+)}
+
+<script>
+  function initToc() {
+    const tocLinks = document.querySelectorAll(".toc a:not(.toc-top)");
+    const topLinks = document.querySelectorAll(".toc a.toc-top");
+    if (!tocLinks.length) return;
+
+    const headingEls = Array.from(tocLinks).map((link) =>
+      document.getElementById(link.getAttribute("href")!.slice(1))
+    ).filter(Boolean) as HTMLElement[];
+
+    if (!headingEls.length) return;
+
+    function updateActive() {
+      let current: HTMLElement | null = null;
+      for (const el of headingEls) {
+        if (el.getBoundingClientRect().top <= 100) {
+          current = el;
+        } else {
+          break;
+        }
+      }
+      tocLinks.forEach((link) => link.classList.remove("toc-active"));
+      topLinks.forEach((link) => link.classList.remove("toc-active"));
+      if (current) {
+        document
+          .querySelectorAll(`.toc a[href="#${current.id}"]`)
+          .forEach((link) => link.classList.add("toc-active"));
+      } else {
+        topLinks.forEach((link) => link.classList.add("toc-active"));
+      }
+    }
+
+    topLinks.forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        history.replaceState(null, "", window.location.pathname);
+      });
+    });
+
+    updateActive();
+    window.addEventListener("scroll", updateActive, { passive: true });
+
+    return () => window.removeEventListener("scroll", updateActive);
+  }
+
+  let cleanup = initToc();
+  document.addEventListener("astro:page-load", () => {
+    cleanup?.();
+    cleanup = initToc();
+  });
+</script>

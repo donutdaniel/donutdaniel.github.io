@@ -26,16 +26,6 @@
       return localStorage.getItem("theme") || "system";
     }
 
-    function applyTheme(setting) {
-      if (setting === "system") {
-        const sys = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-        document.documentElement.setAttribute("data-theme", sys);
-      } else {
-        document.documentElement.setAttribute("data-theme", setting);
-      }
-      document.documentElement.setAttribute("data-theme-setting", setting);
-    }
-
     function cycleTheme() {
       const current = getThemeSetting();
       const next = current === "dark" ? "light" : current === "light" ? "system" : "dark";
@@ -44,14 +34,14 @@
       } else {
         localStorage.setItem("theme", next);
       }
-      applyTheme(next);
+      // Reuse the global applyThemeToDoc from BaseLayout
+      applyThemeToDoc(document);
     }
 
-    applyTheme(getThemeSetting());
     btn?.addEventListener("click", cycleTheme);
 
     window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
-      if (getThemeSetting() === "system") applyTheme("system");
+      if (getThemeSetting() === "system") applyThemeToDoc(document);
     });
   });
 </script>

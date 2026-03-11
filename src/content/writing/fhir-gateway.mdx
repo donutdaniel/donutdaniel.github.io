@@ -1,0 +1,167 @@
+---
+title: "FHIR Gateway"
+description: "A unified API gateway for healthcare data across 60+ payers and EHR systems."
+pubDate: 2026-03-11
+tags: ["healthcare", "fhir", "mcp", "api"]
+repo: "https://github.com/donutdaniel/fhir-gateway"
+website: "https://fhir-mcp.com"
+draft: false
+---
+
+import FhirDiagram from "../../components/FhirDiagram.astro";
+
+<figure>
+  <video src="/writing/fhir-gateway/fhir-gateway-demo.mp4" controls muted playsinline preload="metadata" />
+  <figcaption>Demo of the FHIR Gateway MCP server running in Claude - sped up and truncated from a ~9 minute interaction.</figcaption>
+</figure>
+
+FHIR, which stands for **[Fast Healthcare Interoperability Resources](https://www.hl7.org/fhir/)**, is a standardized api layer for most things healthcare. Adoption has been serious in the past few years: [over 70% of countries actively use it](https://fire.ly/blog/the-state-of-fhir-in-2025/), and in the US it's federally mandated via the [21st Century Cures Act](https://www.healthit.gov/topic/oncs-cures-act-final-rule) and the [CMS Interoperability and Prior Authorization Rule](https://www.cms.gov/cms-interoperability-and-prior-authorization-final-rule-cms-0057-f). So, if you are in the US, its very likely that your payer (insurance), provider (hospital), and EHR (electronic health record) systems have already each implemented the standard on their own servers, with their own auth flows and quirks.
+
+That means the practical applications are already feasible, but underdeveloped. Platform fragmentation and knowledge gaps between clinicians and engineers keep things stuck. So armed with an agentic army and a spare weekend, I spent some time diving into it!
+
+To make this concrete: if you wanted to pull a patient's medication list from Epic, their lab results from Cerner, and their coverage details from Aetna, you'd need three separate OAuth flows, three different base URLs, and you'd be handling three sets of quirks. Each platform returns FHIR resources, but the data you get back is different. EHRs give you clinical data (conditions, medications, lab results, vitals), while payers give you claims, coverage, and explanation of benefit resources. Both speak FHIR, but they're answering fundamentally different questions about the same patient. This issue is also visible in the demo. You can see during the prior auth flow, Claude pointed out that it does not have access to a CRD within the smart health it sandbox.
+
+FHIR Gateway attemps to collapse all of that into one API. One REST endpoint, one [MCP](https://modelcontextprotocol.io), one auth flow, one interface. It currently runs against sandboxes, but you can point it at any platform by adding credentials to a config.
+
+> For some additional context, I'm a software engineer by trade, and I knew next to nothing about medicine prior to this project. To my surprise, it was painlessly easy and quick to learn enough through eli5 llm questions, asking agents to crawl api references, and simply trying out the mcp during development. It truly is astonishing how efficient learning can be with ai if you know how to ask the right questions.
+
+## How it works
+
+<FhirDiagram />
+
+Every request includes a `platform_id` - like `epic`, `aetna`, or `cerner` - that tells the gateway where to route. Platform configs are just JSON files, each defining the FHIR base URL, OAuth endpoints, supported scopes, and any platform-specific behavior.
+
+## The core ideas
+
+### Multi-platform routing
+
+The gateway loads platform configurations from JSON files at startup. Adding a new platform is creating a new JSON file, and adding the corresponding env vars. No code changes, no adapter classes. A `GenericPayerAdapter` handles everything dynamically.
+
+```json
+{
+  "id": "aetna",
+  "name": "Aetna",
+  "type": "payer",
+  "fhir_base_url": "https://vteapif1.aetna.com/fhirdemo/v2/patientaccess",
+  "oauth": {
+    "authorize_url": "https://vteapif1.aetna.com/fhirdemo/authorize",
+    "token_url": "https://vteapif1.aetna.com/fhirdemo/token"
+  }
+}
+```
+
+That's a complete platform definition. 64 of these exist today across payers, EHRs, and sandboxes. EHR platforms like Epic and Cerner are also multi-tenant, meaning there's no single "Epic URL," each hospital runs its own instance, so production access requires onboarding with each organization individually.
+
+While researching routing solutions and data stores I could leverage, the two most interesting products I found were [Fasten Health](https://www.fastenhealth.com/) and [Turquoise Health](https://turquoise.health/). Fasten maintains [fasten-sources](https://github.com/fastenhealth/fasten-sources), a catalog of provider metadata and OAuth endpoints, though their product is patient-facing rather than provider facing. Turquoise focuses on price transparency, making healthcare cost data accessible which is useful to make better estimates (and deals, i suppose). I later found that the claude healthex connector uses fasten for patient data! Because Fasten is more orthogonal wrt to fhir gateway, and turquoise is a little out of reach for a solo dev, I did not integrate either. 
+
+> To further elaborate on platform registration... getting production access to these healthcare platforms is *incredibly* difficult. Many require interviews, SOC2/HIPAA certs, $5k/year licenses (ahem, Oracle), and weeks to months of processing. so I have not done that. The 64 definitions are all crawled and best-effort-verified ones. Sandbox ones are tested, others have no guarantee.
+
+### Authentication and security
+
+When a user authenticates, the gateway initiates a [SMART on FHIR](https://docs.smarthealthit.org/) OAuth flow with PKCE. SMART (Substitutable Medical Applications, Reusable Technologies) is essentially OAuth 2.0 tailored for healthcare, allowing third-party apps to launch from and authorize against FHIR servers. The user authorizes in their browser, the callback is handled automatically, and tokens are stored server-side. No tokens are ever exposed to the client.
+
+Tokens are encrypted at rest, scoped to each browser session via httponly/secure/samesite cookies, and stored in-memory for development or Redis for production. The gateway handles token refresh automatically, so authorization stays live across requests without the user needing to re-authenticate. Beyond auth, the gateway also validates platform IDs, resource types, and resource IDs, rate limits per session, and logs requests for compliance.
+
+### Dual interface: REST + MCP
+
+The same FastAPI server exposes both a REST API and an MCP endpoint. Both share the same session and token management, so an OAuth flow initiated via MCP works with REST calls, and vice versa.
+
+I actually originally started with mcp! But it didn't make much sense to hide it behind one protocol, especially when going for interoperability.
+
+```python
+# MCP is mounted in the same app
+mcp_app = mcp.streamable_http_app()
+app.mount("/mcp", mcp_app)
+```
+
+MCP uses streamable-http transport (not stdio) because OAuth callbacks need the HTTP server running to receive browser redirects.
+
+```bash
+# FHIR operations
+GET  /api/fhir/{platform_id}/metadata              # CapabilityStatement
+GET  /api/fhir/{platform_id}/{resource_type}        # Search
+GET  /api/fhir/{platform_id}/{resource_type}/{id}   # Read
+POST /api/fhir/{platform_id}/{resource_type}        # Create
+PUT  /api/fhir/{platform_id}/{resource_type}/{id}   # Update
+DELETE /api/fhir/{platform_id}/{resource_type}/{id} # Delete
+
+# Authentication
+GET  /auth/{platform_id}/login    # Start OAuth flow
+GET  /auth/status                 # Check auth status
+POST /auth/{platform_id}/logout   # Logout
+```
+
+Everything routes through the `platform_id`.
+
+## Agent interface
+
+The MCP interface lets AI agents query healthcare data through tool calls:
+
+```
+User: "Get my lab results from Epic"
+
+Agent:
+1. get_auth_status(platform_id="epic") → Not authenticated
+2. start_auth(platform_id="epic") → Returns OAuth URL
+3. Tell user to click link
+4. wait_for_auth(platform_id="epic") → Blocks until complete
+5. search(platform_id="epic",
+          resource_type="Observation",
+          params={"category": "laboratory"})
+```
+
+Tools include FHIR operations (`search`, `read`, `create`, `update`, `delete`), auth management (`start_auth`, `wait_for_auth`), and coverage checks (`check_prior_auth`, `get_policy_rules`).
+
+<figure>
+  <img src="/writing/fhir-gateway/prior-auth.png" alt="Prior authorization check for anti-amyloid antibody infusion" loading="lazy" />
+  <figcaption>Running a prior auth check. The agent pulls the patient's coverage via FHIR Gateway, then uses a separate CMS Coverage tool to look up NCD 200.3. Both MCP servers work together in the same conversation.</figcaption>
+</figure>
+
+Any MCP-compatible client can connect to the gateway. Here are a couple examples:
+
+**Claude.ai** — Settings → Connectors → Add Custom Connector:
+- Name: `FHIR Gateway`
+- Remote MCP URL: `https://fhir-mcp.com/mcp`
+
+**ChatGPT** — Settings → Connectors → Advanced → Developer Mode → Create:
+- Name: `FHIR Gateway`
+- URL: `https://fhir-mcp.com/mcp`
+
+**Any MCP client (Claude Code, Cursor, etc.)** — Add to your MCP config:
+
+```json
+{
+  "mcpServers": {
+    "fhir-gateway": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://fhir-mcp.com/mcp"]
+    }
+  }
+}
+```
+
+
+
+The gateway ships with sandbox configs (`epic-sandbox-patient`, `epic-sandbox-clinician`, `smarthealthit-sandbox-patient`) for development. Only SmartHealthIT and HAPI sandboxes work without any registration.
+
+## Clinician natural language workflows
+
+This is the most exciting part to me! You can kick off medical workflows in natural language, and an agent with access to this MCP can do what a doctor or nurse does on a computer, with no additional scaffolding. Add skills and memory persistence, and you've got an working ai healthcare workspace.
+
+The video at the top demonstrates this. Source is I had a friend in the medical field test the MCP against a sandbox.
+
+<figure>
+  <img src="/writing/fhir-gateway/service-request-and-claim.png" alt="Creating a ServiceRequest and prior authorization Claim" loading="lazy" />
+  <figcaption>Creating a ServiceRequest and preauth Claim. Complete with HCPCS codes, diagnosis references, and NCD 200.3 supporting info.</figcaption>
+</figure>
+
+## Links
+
+The repo is open source at [github.com/donutdaniel/fhir-gateway](https://github.com/donutdaniel/fhir-gateway) and live at [fhir-mcp.com](https://fhir-mcp.com).
+
+Sources and references:
+- [HL7 FHIR Specification](https://www.hl7.org/fhir/) — the standard itself
+- [SMART on FHIR](https://docs.smarthealthit.org/) — the OAuth-based app launch framework
+- [ONC's Cures Act Final Rule](https://www.healthit.gov/topic/oncs-cures-act-final-rule) — the US federal mandate requiring FHIR APIs
+- [State of FHIR 2025](https://fire.ly/blog/the-state-of-fhir-in-2025/) — global adoption survey by Firely/HL7
+- [Model Context Protocol](https://modelcontextprotocol.io) — the open protocol for connecting AI agents to tools and data
