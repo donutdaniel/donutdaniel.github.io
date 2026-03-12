@@ -1,0 +1,25 @@
+# https://www.danielho.xyz/robots.txt
+
+User-agent: *
+Allow: /
+
+# AI crawlers — welcome
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# LLM-friendly content
+# See /llms.txt and /llms-full.txt for clean markdown versions
+
+Sitemap: https://www.danielho.xyz/sitemap-index.xml
