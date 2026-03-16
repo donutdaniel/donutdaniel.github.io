@@ -1,6 +1,6 @@
 ---
-title: "FHIR Gateway"
-description: "A unified API gateway for healthcare data across 60+ payers and EHR systems."
+title: "A Glimpse Into AI Healthcare Workflows"
+description: "Building a unified FHIR gateway and MCP server to let AI agents handle healthcare workflows across 60+ platforms."
 pubDate: 2026-03-11T12:00:00Z
 tags: ["healthcare", "fhir", "mcp", "api"]
 repo: "https://github.com/donutdaniel/fhir-gateway"
@@ -11,17 +11,17 @@ draft: false
 import FhirDiagram from "../../components/FhirDiagram.astro";
 
 <figure>
-  <video src="/writing/fhir-gateway/fhir-gateway-demo.mp4" controls muted playsinline preload="metadata" />
+  <video src="/writing/ai-healthcare-workflows/fhir-gateway-demo.mp4" controls muted playsinline preload="metadata" style="aspect-ratio: 16/9; width: 100%; background: #000;" />
   <figcaption>Demo of the FHIR Gateway MCP server running in Claude - sped up and truncated from a ~9 minute interaction.</figcaption>
 </figure>
 
-FHIR, which stands for **[Fast Healthcare Interoperability Resources](https://www.hl7.org/fhir/)**, is a standardized api layer for most things healthcare. Adoption has been serious in the past few years: [over 70% of countries actively use it](https://fire.ly/blog/the-state-of-fhir-in-2025/), and in the US it's federally mandated via the [21st Century Cures Act](https://www.healthit.gov/topic/oncs-cures-act-final-rule) and the [CMS Interoperability and Prior Authorization Rule](https://www.cms.gov/cms-interoperability-and-prior-authorization-final-rule-cms-0057-f). So, if you are in the US, its very likely that your payer (insurance), provider (hospital), and EHR (electronic health record) systems have already each implemented the standard on their own servers, with their own auth flows and quirks.
+FHIR, which stands for [Fast Healthcare Interoperability Resources](https://www.hl7.org/fhir/), is a standardized api layer for most things healthcare. Adoption has been serious in the past few years: [over 70% of countries actively use it](https://fire.ly/blog/the-state-of-fhir-in-2025/), and in the US it's federally mandated via the [21st Century Cures Act](https://www.healthit.gov/topic/oncs-cures-act-final-rule) and the [CMS Interoperability and Prior Authorization Rule](https://www.cms.gov/cms-interoperability-and-prior-authorization-final-rule-cms-0057-f). So, if you are in the US, it's very likely that your payer (insurance), provider (hospital), and EHR (electronic health record) systems have already each implemented the standard on their own servers, with their own auth flows and quirks.
 
 That means the practical applications are already feasible, but underdeveloped. Platform fragmentation and knowledge gaps between clinicians and engineers keep things stuck. So armed with an agentic army and a spare weekend, I spent some time diving into it!
 
-To make this concrete: if you wanted to pull a patient's medication list from Epic, their lab results from Cerner, and their coverage details from Aetna, you'd need three separate OAuth flows, three different base URLs, and you'd be handling three sets of quirks. Each platform returns FHIR resources, but the data you get back is different. EHRs give you clinical data (conditions, medications, lab results, vitals), while payers give you claims, coverage, and explanation of benefit resources. Both speak FHIR, but they're answering fundamentally different questions about the same patient. This issue is also visible in the demo. You can see during the prior auth flow, Claude pointed out that it does not have access to a CRD within the smart health it sandbox.
+To make this concrete: if you wanted to pull a patient's medication list from Epic, their lab results from Cerner, and their coverage details from Aetna, you'd need three separate OAuth flows, three different base URLs, and you'd be handling three sets of quirks. Each platform returns FHIR resources, but the data you get back is different. EHRs give you clinical data (conditions, medications, lab results, vitals), while payers give you claims, coverage, and explanation of benefit resources. They may all be FHIR compatible, but they're answering fundamentally different questions about the same patient. This issue is also visible in the demo. You can see during the prior auth flow, Claude pointed out that it does not have access to a CRD within the smart health it sandbox.
 
-FHIR Gateway attemps to collapse all of that into one API. One REST endpoint, one [MCP](https://modelcontextprotocol.io), one auth flow, one interface. It currently runs against sandboxes, but you can point it at any platform by adding credentials to a config.
+FHIR Gateway attempts to collapse all of that into one API. One rest endpoint, one mcp, one auth flow, one interface. It currently runs against sandboxes, but you can point it at any platform by adding credentials to a config.
 
 > For some additional context, I'm a software engineer by trade, and I knew next to nothing about medicine prior to this project. To my surprise, it was painlessly easy and quick to learn enough through eli5 llm questions, asking agents to crawl api references, and simply trying out the mcp during development. It truly is astonishing how efficient learning can be with ai if you know how to ask the right questions.
 
@@ -52,9 +52,9 @@ The gateway loads platform configurations from JSON files at startup. Adding a n
 
 That's a complete platform definition. 64 of these exist today across payers, EHRs, and sandboxes. EHR platforms like Epic and Cerner are also multi-tenant, meaning there's no single "Epic URL," each hospital runs its own instance, so production access requires onboarding with each organization individually.
 
-While researching routing solutions and data stores I could leverage, the two most interesting products I found were [Fasten Health](https://www.fastenhealth.com/) and [Turquoise Health](https://turquoise.health/). Fasten maintains [fasten-sources](https://github.com/fastenhealth/fasten-sources), a catalog of provider metadata and OAuth endpoints, though their product is patient-facing rather than provider facing. Turquoise focuses on price transparency, making healthcare cost data accessible which is useful to make better estimates (and deals, i suppose). I later found that the claude healthex connector uses fasten for patient data! Because Fasten is more orthogonal wrt to fhir gateway, and turquoise is a little out of reach for a solo dev, I did not integrate either. 
+While researching routing solutions and data stores I could leverage, the two most interesting products I found were [Fasten Health](https://www.fastenhealth.com/) and [Turquoise Health](https://turquoise.health/). Fasten maintains [fasten-sources](https://github.com/fastenhealth/fasten-sources), a catalog of provider metadata and OAuth endpoints, though their product is patient-facing rather than provider facing. Turquoise focuses on price transparency, making healthcare cost data accessible which is useful to make better estimates (and deals, i suppose). I later found that the claude healthex connector uses fasten for patient data! Because Fasten is more orthogonal wrt fhir gateway, and turquoise is a little out of reach for a solo dev, I did not integrate either, although they could certainly be useful.
 
-> To further elaborate on platform registration... getting production access to these healthcare platforms is *incredibly* difficult. Many require interviews, SOC2/HIPAA certs, $5k/year licenses (ahem, Oracle), and weeks to months of processing. so I have not done that. The 64 definitions are all crawled and best-effort-verified ones. Sandbox ones are tested, others have no guarantee.
+> To further elaborate on platform registration... getting production access to these healthcare platforms is *incredibly* difficult. Many require interviews, SOC2/HIPAA certs, $5k/year licenses (ahem, Oracle), and weeks to months of processing. So I have not done that. The 64 definitions are all crawled and best-effort-verified ones. Sandbox ones are tested, others have no guarantee.
 
 ### Authentication and security
 
@@ -112,10 +112,17 @@ Agent:
 
 Tools include FHIR operations (`search`, `read`, `create`, `update`, `delete`), auth management (`start_auth`, `wait_for_auth`), and coverage checks (`check_prior_auth`, `get_policy_rules`).
 
+So what is it useful for? Behold one of the biggest pain points: prior auth, the process where a provider must get approval from a payer before delivering a service. It is often delayed (I had to schedule a CT scan a month out bc of prior auth taking 1+ week), or mismanaged due to interop difficulties. An [AMA 2024 survey](https://www.ama-assn.org/system/files/prior-authorization-survey.pdf) found that 29% of physicians reported patients experiencing a serious adverse event due to prior auth delays. [CMS-0057-F](https://www.cms.gov/newsroom/fact-sheets/cms-interoperability-prior-authorization-final-rule-cms-0057-f) now mandates 72-hour (urgent) and 7-day (standard) prior auth decision times starting Jan 2026, with payers required to expose prior auth via FHIR APIs by Jan 2027.
+
 <figure>
-  <img src="/writing/fhir-gateway/prior-auth.png" alt="Prior authorization check for anti-amyloid antibody infusion" loading="lazy" />
+  <img src="/writing/ai-healthcare-workflows/prior-auth.png" alt="Prior authorization check for anti-amyloid antibody infusion" loading="lazy" />
   <figcaption>Running a prior auth check. The agent pulls the patient's coverage via FHIR Gateway, then uses a separate CMS Coverage tool to look up NCD 200.3. Both MCP servers work together in the same conversation.</figcaption>
 </figure>
+
+There's also the complexity of healthcare terminology. Diagnoses arrive as ICD-10, SNOMED CT, or free text; medications as RxNorm or NDC codes; labs as LOINC; procedures as CPT or HCPCS. The gateway passes these through transparently, but still requires interpretation and validation. Luckily, these are much more straightforward to integrate due to stable coding and existing connector availabilities, making interactions inside an llm conversation pretty smooth.
+
+
+### Connecting
 
 Any MCP-compatible client can connect to the gateway. Here are a couple examples:
 
@@ -140,20 +147,27 @@ Any MCP-compatible client can connect to the gateway. Here are a couple examples
 }
 ```
 
-
-
 The gateway ships with sandbox configs (`epic-sandbox-patient`, `epic-sandbox-clinician`, `smarthealthit-sandbox-patient`) for development. Only SmartHealthIT and HAPI sandboxes work without any registration.
 
 ## Clinician natural language workflows
 
-This is the most exciting part to me! You can kick off medical workflows in natural language, and an agent with access to this MCP can do what a doctor or nurse does on a computer, with no additional scaffolding. Add skills and memory persistence, and you've got an working ai healthcare workspace.
+This is the most exciting part to me! You can kick off medical workflows in natural language, and an agent with access to this MCP can do what a doctor or nurse does on a computer, with no additional scaffolding. The point is that it can help cut down the most mundane clerical tasks like data entry, scheduling, billing/coding, and give back time for direct patient care.
 
-The video at the top demonstrates this. Source is I had a friend in the medical field test the MCP against a sandbox.
+The video at the top demonstrates this. I had a friend in the medical field test the MCP against a sandbox.
 
 <figure>
-  <img src="/writing/fhir-gateway/service-request-and-claim.png" alt="Creating a ServiceRequest and prior authorization Claim" loading="lazy" />
+  <img src="/writing/ai-healthcare-workflows/service-request-and-claim.png" alt="Creating a ServiceRequest and prior authorization Claim" loading="lazy" />
   <figcaption>Creating a ServiceRequest and preauth Claim. Complete with HCPCS codes, diagnosis references, and NCD 200.3 supporting info.</figcaption>
 </figure>
+
+
+## On AI in Healthcare
+
+LLMs of today are not healthcare workers, nor do I have an expectation that they will be anytime soon. The intention of this project, and consequently this technology, is to demonstrate how powerful modern ai can be with the right set of tools and context. I believe this technology can act as the greatest leverage in the most difficult domains, in healthcare and policy alike, in fields that are supposed to be so unequivocally beneficial, but mired by misaligned corporate incentives and slow public policies. My hope is that adoption of such technologies will be a great lift to those who intend to do good.
+
+And yet there can be no value placed on or replacement for human interaction. Doctor patient relationships are uniquely personal, even if not the most efficient. I can, however, imagine a world where data-backed opinions and decisions can be automated, and we choose automation because it is the most utilitarian choice to make. If that comes to pass, my hope is that not only are the treatments more effective, but the relationships we make are even more meaningful.
+
+Finally, to other engineers: it's a great time to learn something you know nothing about. Read articles, ask professionals, make something!
 
 ## Links
 
@@ -164,4 +178,3 @@ Sources and references:
 - [SMART on FHIR](https://docs.smarthealthit.org/) — the OAuth-based app launch framework
 - [ONC's Cures Act Final Rule](https://www.healthit.gov/topic/oncs-cures-act-final-rule) — the US federal mandate requiring FHIR APIs
 - [State of FHIR 2025](https://fire.ly/blog/the-state-of-fhir-in-2025/) — global adoption survey by Firely/HL7
-- [Model Context Protocol](https://modelcontextprotocol.io) — the open protocol for connecting AI agents to tools and data
