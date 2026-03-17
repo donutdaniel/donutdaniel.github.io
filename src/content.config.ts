@@ -11,6 +11,7 @@ const writing = defineCollection({
     draft: z.boolean().default(false),
     repo: z.string().url().optional(),
     website: z.string().url().optional(),
+    ogImage: z.string().optional(),
   }),
 });
 
